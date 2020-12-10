@@ -2,5 +2,13 @@
 title: "About This Website"
 ---
 
-This is the Portfolio Website for ANLY-503 by Ruizhe Li. 
+### Project and Homework Introductions
+
+1. The goal of the final project is to analyze the players in English Premier League's football clubs in 2019-2020 season and show the relationship between player stats in FIFA and the final standing of English Premier League. And it also analyzes the recent transfer actions by the English Premier League's football clubs.
+
+2. HW5 is the visualizations and analysis on raw data bumps from the bank's system.
+
+3. HW6 is the geospatial visualization about historical US election data and umemployment rates of three chosen states: "Texas", "Pennsylvania" and "California".
+
+4. HW7 is a visualization about migration data of Washington, Texas, New York and Virginia in 2018 using Sankey diagram.
 
