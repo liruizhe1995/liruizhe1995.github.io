@@ -1,0 +1,22 @@
+name: "my-website"
+navbar:
+  title: "My Website"
+  type: 
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    - text: "Final Project"
+      href: final-project.html
+    - text: "HW5"
+      href: a5.html
+    - text: "HW6"
+      href: a6.html
+    - text: "HW7"
+      href: a7.html
+      
+output:
+  html_document:
+    highlight: textmate
+    theme: flatly

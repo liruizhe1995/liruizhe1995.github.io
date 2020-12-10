@@ -1,0 +1,416 @@
+---
+title: "final-project"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    navbar:
+      - { title: "home", href: "https://google.com", align: right }
+---
+
+
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(GGally)
+library(sna)
+library(tidyverse)
+library(igraph)
+library(ggwordcloud)
+```
+
+```{r my_theme}
+my_theme <- function() {
+
+  # Colors
+  color.background = "white"
+  color.text = "#8c8878"
+
+  # Begin construction of chart
+  theme_bw(base_size=15) +
+
+    # Format background colors
+    theme(panel.background = element_rect(fill=color.background, color=color.background)) +
+    theme(plot.background  = element_rect(fill=color.background, color=color.background)) +
+    theme(panel.border     = element_rect(color=color.background)) +
+    theme(strip.background = element_rect(fill=color.background, color=color.background)) +
+
+    # Format title and axis labels
+    theme(plot.title       = element_text(color=color.text, size=16, face = "bold")) +
+    theme(axis.title.x     = element_text(size=14, color="black", face = "bold")) +
+    theme(axis.title.y     = element_text(size=14, color="black", face = "bold", vjust=1.25)) +
+    theme(axis.text.x      = element_text(size=10, vjust=0.5, hjust=0.5, color = color.text)) +
+    theme(axis.text.y      = element_text(size=10, color = color.text)) +
+    theme(strip.text       = element_text(face = "bold")) +
+
+    # Plot margins
+    theme(plot.margin = unit(c(0.35, 0.2, 0.3, 0.35), "cm"))
+}
+```
+About 
+=======================================================================
+
+This is the final project for ANLY-503 by Ruizhe Li. 
+
+The goal of the project is to analyze the players in English Premier League's football clubs in 2019-2020 season and show the relationship between player stats in FIFA and the final standing of English Premier League.
+
+The project also analyzes the recent transfer actions by the English Premier League's football clubs.
+
+The transfer datasets are downloaded from the following website: https://github.com/ewenme/transfers/tree/master/data
+
+English Premier League Ranking table downloaded from: https://www.rotowire.com/soccer/league-table.php?season=2019
+
+FIFA player dataset is downloaded from: https://www.kaggle.com/stefanoleone992/fifa-20-complete-player-dataset
+
+The dashboard is created by R language and RStudio, with libraries including: flexdashboard, dplyr, tidyr, ggplot2, GGally, sna, tidyverse, igraph, ggwordcloud.
+
+Overall Ratings and Final Standing 19/20 Season
+=======================================================================
+
+Column
+-----------------------------------------------------------------------
+
+### Overall in FIFA for Each Team's Player in 19/20 Season
+
+```{r}
+fifa20 <- read.csv("data/players_20.csv")
+
+prem_clubs = c("Liverpool", "Manchester City", "Manchester United", "Chelsea", "Leicester City", "Tottenham Hotspur", "Wolverhampton Wanderers", "Arsenal", "Sheffield United", "Burnley", "Southampton", "Everton", "Newcastle United", "Crystal Palace", "Brighton & Hove Albion",
+"West Ham United", "Aston Villa", "Bournemouth", "Watford", "Norwich City")
+
+prem_players <- fifa20 %>%
+              filter(fifa20$club %in% prem_clubs)
+
+## get top 18 players for each team
+prem_players_18 <- prem_players %>%
+              group_by(club) %>%
+              slice_max(order_by = overall, n = 18)
+              
+
+club_overall <- prem_players_18 %>%
+          group_by(club) %>%
+          summarize(overall_club = mean(overall)) %>%
+          arrange(overall_club) %>%
+          mutate(club = factor(club, levels = .$club))
+
+prem_players_18 <- prem_players_18 %>%
+          mutate(club = factor(club, levels = club_overall$club))
+
+ggplot(prem_players_18, aes(club, overall, fill=club)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme(legend.position = "none") + 
+  ggtitle("All Player's Overall Ability \nof Each Team in FIFA") + 
+  my_theme() + 
+  theme(legend.position = "none")
+
+```
+
+*** 
+
+    The top 6 most famous team in Premier League: Manchester City, Liverpool, Tottenham Hotspur, Manchester United and Chelsea have the top 6 highest overall ability players in Premier League.
+
+Column
+------------------------------------------------------------------------
+
+### Final Rank and Points in 19/20 Season
+
+```{r}
+rank19 <- read.csv("data/soccer-standings.csv", header=TRUE)
+names(rank19) <- rank19[1,]
+rank19 <- rank19[-1,]
+rank19 <- rank19[,0:3]
+
+rank19 <- rank19 %>%
+          arrange(P) %>%
+          mutate(Team = factor(Team, levels=.$Team))
+
+ggplot(rank19, aes(Team, P, fill=Team)) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  theme(legend.position = "none") +
+  ylab("Total Points Gained in 19/20 Season") +
+  xlab("club") +
+  ggtitle("Final Rank and Points in \nPremier League 19/20 Season") +
+  my_theme() + 
+  theme(legend.position = "none")
+  
+```
+
+***
+
+    In 19/20 season we see that top 6 teams in overall are all in top 10 final rank. Leicester City and Wolverhampton are the two teams with lower overall ratings but quite high in final rank. For the lower part teams in the season final ranking, we see that the overall ability of those team are similar therefore their final rank are more unpredictable based on the players' overall stats.
+
+Map of players
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Map of Total Player Count in Premier League in 19/20 Season Except Britain
+
+
+```{r}
+map_players <- select(prem_players, long_name,nationality)
+map_players <- map_players %>%
+    group_by(nationality) %>%
+    summarise(Count = n())
+
+map_players$nationality[map_players$nationality=="England"] <- "UK"
+map_players$nationality[map_players$nationality=="United States"] <- "USA"
+map_players$nationality[map_players$nationality=="Korea Republic"] <- "South Korea"
+map_players$nationality[map_players$nationality=="DR Congo"] <- "Democratic Republic of the Congo"
+
+worldmap = map_data("world")
+
+merged_data <- merge(x = worldmap, y = map_players, by.x = "region", by.y = "nationality", all.x = TRUE)
+ggplot(data = merged_data, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Count)) +
+  labs(fill='Total Players Counts') +
+  ggtitle("Total Players from All over the World") + 
+  my_theme()
+```
+
+*** 
+
+    Most Players in Premier League are from the England since there's a rule in Premier League with minimum number of British players in each team.
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Map of Total Player Count in Premier League in 19/20 Season Containing Britain
+
+
+```{r}
+map_players$nationality[map_players$nationality=="UK"] <- "England"
+
+merged_data <- merge(x = worldmap, y = map_players, by.x = "region", by.y = "nationality", all.x = TRUE)
+
+ggplot(data = merged_data, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = Count)) +
+  labs(fill='Total Players Counts') +
+  ggtitle("Total Players From All Countries other than Britain") + 
+  my_theme()
+```
+
+*** 
+
+    We see that except for Britain, most Premier League players come from South America, France and Spain. Also there are some players from Africa, Oceania, Europe and east Asia.
+    
+
+Year 2020 Transfer Overall 
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Overall Transfer for English Premier League in 2020
+
+```{r, echo=FALSE}
+df_2020 <- read.csv("data/2020.csv")
+
+## Rank the total spend from highest to lowest
+spend <- df_2020 %>%
+        group_by(club_name) %>%
+        filter(transfer_movement=="in") %>%
+        summarise(spending = sum(fee_cleaned,na.rm = TRUE)) %>%
+        arrange(spending) %>%
+        mutate(club_name = factor(club_name, levels = club_name))
+
+## get the table including transfer in and transfer out and rank in spending value
+transfer <- df_2020 %>%
+        group_by(club_name, transfer_movement) %>%
+        summarise(spending = sum(fee_cleaned,na.rm = TRUE)) %>%
+        ungroup() %>%
+        mutate(club_name = factor(club_name, levels = spend$club_name))
+
+
+ggplot(transfer, aes(spending, club_name)) +
+  geom_line(aes(group = club_name)) +
+  geom_point(aes(color=transfer_movement)) +
+  ggtitle("Transfer fees spent and raised by \n Premier League clubs in 2020") +
+  xlab("£ Millions") +
+  my_theme()
+  
+```
+
+***
+
+    In general, Chelsea FC, Mancheter City and Arsenal FC spent top three amount of money on buying players. While Leeds United, Sheffiled United, Aston Villa, Newcaste United, Fulham FC and Burnley FC didn't get any money from selling or lending players.
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Number of players transfer
+
+```{r}
+transfer_cnt <- df_2020 %>%
+        group_by(club_name, transfer_movement) %>%
+        count(club_name, transfer_movement, sort=TRUE) %>%
+        mutate(club_name = factor(club_name, levels = spend$club_name))
+
+ggplot(transfer_cnt, aes(club_name, n, fill=transfer_movement)) +
+  geom_bar(stat="identity", position="dodge") +
+  coord_flip() +
+  ggtitle("Number of players transfer in and out by \n Premier League clubs in 2020") +
+  ylab("Number of Players") + 
+  my_theme()
+```
+
+***
+
+    From the graph, it's unusual to see Brighton and Fulham transfered in as many players as Chelsea and Mancheter City. Most of the players Fulham and Brighton got are the ones without transfer fee or end of loan so they didn't pay too much from getting the players.
+
+Network Graph and Word Cloud About 2020 Transfer
+=======================================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Network Graph for 2020 Transfer
+
+```{r}
+
+df_2020_in <- df_2020 %>%
+  filter(transfer_movement == "in") %>%
+  group_by(club_name, club_involved_name) %>%
+  count(club_name, club_involved_name) %>%
+  filter(club_name %in% prem_clubs) %>%
+  filter(club_involved_name %in% prem_clubs)
+
+
+nodes <- unique(c(unique(df_2020_in$club_name), unique(df_2020_in$club_involved_name)))
+
+names(df_2020_in) <- c("target", "source", "importance")
+
+df_2020_in <- df_2020_in[c("source", "target", "importance")]
+
+links <- df_2020_in
+
+network <- graph_from_data_frame(d=links, vertices=nodes, directed=TRUE)
+
+plot(network, layout = layout.circle, edge.width=E(network)$importance*2, main="Transfer among Premier League's Teams in 2020")
+```
+
+***
+
+    The graph shows the player transfers between Premier League's teams in 2020. The top teams such as Arsenal, Chelsea and Liverpool didn't buy players from other Premier League's teams and sold the players they no longer needed to other teams.
+
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Word Cloud
+
+```{r}
+set.seed(42)
+wc_out <- df_2020_in %>%
+  group_by(source) %>%
+  summarise(cnt = sum(importance))
+
+ggplot(wc_out, aes(label = source, size=cnt, color = factor(sample.int(10, nrow(wc_out), replace = TRUE)))) +
+  geom_text_wordcloud() + 
+  scale_size_area(max_size = 10) +
+  ggtitle("Football Clubs that Sold Players to Other Premier League's Teams") +
+  my_theme()
+```
+
+***
+    Bournemouth, Chelsea and Liverpool sold most number of players to other Premier League's teams in 2020.
+
+Transfer in ranking from 2015 to 2020 
+=======================================================================
+
+```{r}
+df_2015 <- read.csv("data/2015.csv")
+df_2016 <- read.csv("data/2016.csv")
+df_2017 <- read.csv("data/2017.csv")
+df_2018 <- read.csv("data/2018.csv")
+df_2019 <- read.csv("data/2019.csv")
+
+df_time_vis <- df_2015 %>%
+  filter(transfer_movement=="in") %>%
+  group_by(club_name) %>%
+  summarise(spending = sum(fee_cleaned, na.rm = TRUE)) %>%
+  mutate(ranks = order(order(spending, decreasing = TRUE)))
+
+df_time_vis['year'] = 2015
+
+df_time_vis_16 <- df_2016 %>%
+  filter(transfer_movement=="in") %>%
+  group_by(club_name) %>%
+  summarise(spending = sum(fee_cleaned, na.rm = TRUE)) %>%
+  mutate(ranks = order(order(spending, decreasing = TRUE)))
+ 
+df_time_vis_16['year'] = 2016
+
+df_time_vis = rbind(df_time_vis, df_time_vis_16)
+
+df_time_vis_17 <- df_2017 %>%
+  filter(transfer_movement=="in") %>%
+  group_by(club_name) %>%
+  summarise(spending = sum(fee_cleaned, na.rm = TRUE)) %>%
+  mutate(ranks = order(order(spending, decreasing = TRUE)))
+ 
+df_time_vis_17['year'] = 2017
+
+df_time_vis = rbind(df_time_vis, df_time_vis_17)
+
+df_time_vis_18 <- df_2018 %>%
+  filter(transfer_movement=="in") %>%
+  group_by(club_name) %>%
+  summarise(spending = sum(fee_cleaned, na.rm = TRUE)) %>%
+  mutate(ranks = order(order(spending, decreasing = TRUE)))
+ 
+df_time_vis_18['year'] = 2018
+
+df_time_vis = rbind(df_time_vis, df_time_vis_18)
+
+df_time_vis_19 <- df_2019 %>%
+  filter(transfer_movement=="in") %>%
+  group_by(club_name) %>%
+  summarise(spending = sum(fee_cleaned, na.rm = TRUE)) %>%
+  mutate(ranks = order(order(spending, decreasing = TRUE)))
+ 
+df_time_vis_19['year'] = 2019
+
+df_time_vis = rbind(df_time_vis, df_time_vis_19)
+
+df_time_vis_20 <- df_2020 %>%
+  filter(transfer_movement=="in") %>%
+  group_by(club_name) %>%
+  summarise(spending = sum(fee_cleaned, na.rm = TRUE)) %>%
+  mutate(ranks = order(order(spending, decreasing = TRUE)))
+ 
+df_time_vis_20['year'] = 2020
+
+df_time_vis = rbind(df_time_vis, df_time_vis_20)
+```
+
+Column {}
+-----------------------------------------------------------------------
+
+***
+    For the top 6 clubs in Premier League: Arsenal, Chelsea, Liverpool, Manchester City, Manchester United and Tottenham Hotspur, from 2015 to 2020, at least 4 teams spent top five in the league except 2018. This shows that for the Premier League Giants, they have to spend more money than other teams to keep their standings in the league. 
+    
+
+### Time Series Graph for Spendings
+
+```{r}
+df_time_vis <- df_time_vis %>%
+  filter(club_name %in% c("Liverpool FC", "Manchester City", "Manchester United", "Chelsea FC", "Arsenal FC", "Tottenham Hotspur"))
+
+
+ggplot(df_time_vis, aes(year, ranks, color=club_name)) +
+  geom_line(aes(color = club_name)) + 
+  geom_point(aes(color = club_name)) + 
+  scale_y_reverse() +
+  ggtitle("Ranks of Spending of Top 6 Clubs \nin Premier League from 2015 to 2020") +
+  my_theme()
+```
+    

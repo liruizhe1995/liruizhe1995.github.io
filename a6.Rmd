@@ -1,0 +1,143 @@
+---
+title: "a6"
+author: "Ruizhe Li"
+date: "12/9/2020"
+output: html_document
+---
+
+```{r, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(hrbrthemes)
+library(viridis)
+library(sf)
+library(spData)
+library(readxl)
+library(maps)
+library(gridExtra)
+library(reshape)
+```
+
+```{r, include=FALSE}
+unemploy <- read_excel("data/Unemployment.xls",range = cell_limits(c(8, 1), c(NA, NA)))
+ue <- unemploy %>% select(FIPStxt,Unemployment_rate_2008,Unemployment_rate_2012,Unemployment_rate_2016)
+colnames(ue)[2] <- 2008
+colnames(ue)[3] <- 2012
+colnames(ue)[4] <- 2016
+ue <- as.data.frame(ue)
+test <- melt(ue, id=c('FIPStxt'))
+colnames(test)[2] <- "year"
+ue <- test
+ue$year = as.numeric(as.character(ue$year))
+```
+
+```{r, echo=FALSE}
+election <- read.csv("data/countypres_2000-2016.csv")
+
+election_2008 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "Texas")
+
+election_2008['proportion'] = election_2008['candidatevotes'] / election_2008['totalvotes']
+
+county_df <- map_data("county")
+state_df <- map_data("state")
+county_df = county_df %>% filter(region == "texas")
+
+election_2008$county = tolower(election_2008$county)
+
+choropleth <- left_join(county_df, election_2008, by = c("subregion" = "county"))
+choropleth <- na.omit(choropleth)
+
+
+gg <- ggplot(choropleth, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = proportion)) + 
+  scale_fill_distiller(name="Prop. of Votes", palette = "Blues") +
+  facet_wrap(~year, scales = "free") + 
+  ggtitle("Proportion of Votes for Democrat Candidate in Texas")
+      
+ue$FIPStxt <- as.numeric(as.character(ue$FIPStxt))
+
+choro_ue <- left_join(choropleth, ue, by = c("FIPS" = "FIPStxt", "year" = "year"))
+choro_ue <- na.omit(choro_ue)
+
+ggue <- ggplot(choro_ue, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = value)) + 
+  scale_fill_distiller(name="UER(%)", palette = "Blues") +
+  facet_wrap(~year, scales = "free") + 
+  ggtitle("Unemployment Rates in Texas")
+
+
+grid.arrange(gg, ggue, nrow = 2)
+
+```
+
+```{r, echo=FALSE}
+election_2012 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "California")
+
+election_2012['proportion'] = election_2012['candidatevotes'] / election_2012['totalvotes']
+
+county_df <- map_data("county")
+state_df <- map_data("state")
+county_df = county_df %>% filter(region == "california")
+
+election_2012$county = tolower(election_2012$county)
+
+choropleth12 <- left_join(county_df, election_2012, by = c("subregion" = "county"))
+choropleth12 <- na.omit(choropleth12)
+
+
+gg12 <- ggplot(choropleth12, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = proportion)) + 
+  scale_fill_distiller(name="Prop. of Votes", palette = "Blues")
+  
+
+gg12 <- gg12 + facet_wrap(~year, scales = "free") + 
+  ggtitle("Proportion of Votes for Democrat Candidate in California")
+      
+choro_ue12 <- left_join(choropleth12, ue, by = c("FIPS" = "FIPStxt", "year" = "year"))
+choro_ue12 <- na.omit(choro_ue12)
+
+ggue12 <- ggplot(choro_ue12, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = value)) + 
+  scale_fill_distiller(name="UER(%)", palette = "Blues") +
+  facet_wrap(~year, scales = "free") + 
+  ggtitle("Unemployment Rates in California")
+
+
+grid.arrange(gg12, ggue12, nrow = 2)
+```
+
+```{r, echo=FALSE}
+election_2016 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "Pennsylvania")
+
+election_2016['proportion'] = election_2016['candidatevotes'] / election_2016['totalvotes']
+
+county_df <- map_data("county")
+state_df <- map_data("state")
+county_df = county_df %>% filter(region == "pennsylvania")
+
+election_2016$county = tolower(election_2016$county)
+
+choropleth16 <- left_join(county_df, election_2016, by = c("subregion" = "county"))
+choropleth16 <- na.omit(choropleth16)
+
+
+gg16 <- ggplot(choropleth16, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = proportion)) + 
+  scale_fill_distiller(name="Prop. of Votes", palette = "Blues")
+  
+
+gg16 <- gg16 + facet_wrap(~year, scales = "free") + 
+  ggtitle("Proportion of Votes for Democrat Candidate in Pennsylvania")
+      
+choro_ue16 <- left_join(choropleth16, ue, by = c("FIPS" = "FIPStxt", "year" = "year"))
+choro_ue16 <- na.omit(choro_ue16)
+
+ggue16 <- ggplot(choro_ue16, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = value)) + 
+  scale_fill_distiller(name="UER(%)", palette = "Blues") +
+  facet_wrap(~year, scales = "free") + 
+  ggtitle("Unemployment Rates in Pennsylvania")
+
+
+grid.arrange(gg16, ggue16, nrow = 2)
+```

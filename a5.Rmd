@@ -1,0 +1,114 @@
+---
+title: "Assignment 5"
+author: "Ruizhe Li"
+date: "12/9/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(hrbrthemes)
+library(viridis)
+library(tidyr)
+library(plotly)
+```
+
+## 1.Explore all accounts. Create visualizations that combine or these account characteristics:
+  * Whether an account has a credit card or not
+  * Whether an account has a loan or not
+  * The average balance for the account
+
+```{r, message = FALSE, echo=FALSE}
+
+accounts <- read.csv("data/accounts_analytical.csv")
+transactions <- read.csv("data/transactions.csv")
+
+accounts = accounts %>% 
+  mutate(has_credit = if_else(is.na(credit_cards),
+                               true = 'No credit card', false = 'has credit card'))
+
+mean_balance <- transactions %>%
+  group_by(account_id) %>%
+  summarise(mean_balance = mean(balance))
+
+accounts = accounts %>% 
+  mutate(has_loan = if_else(is.na(loan_default),
+                              true = 'No Loan', false = 'Has Loan'))
+
+p1 <- accounts %>%
+  inner_join(mean_balance, by = ('account_id')) %>%
+  select(account_id, has_credit, mean_balance, has_loan)
+
+ggplot(p1, aes(x=mean_balance, color = has_loan, fill = has_loan )) +
+  geom_density(alpha=0.5) +
+  facet_grid(has_credit ~ .) +
+  theme_ipsum() +
+    labs( title = "Account characteristics",
+          xlab = "The average balance for the account",
+          ylab = "Density")
+```
+
+
+## 2. What is the distribution of all loans and what are their characteristics?
+
+```{r, echo=FALSE, warning=FALSE}
+loan_12 = accounts$loan_amount[accounts$loan_term==12]
+loan_24 = accounts$loan_amount[accounts$loan_term==24]
+loan_36 = accounts$loan_amount[accounts$loan_term==36]
+loan_48 = accounts$loan_amount[accounts$loan_term==48]
+loan_60 = accounts$loan_amount[accounts$loan_term==60]
+
+fig <- plot_ly(
+  x = loan_12,
+  type = "histogram",
+  alpha = 0.5,
+  name = "12",
+  title = "Loan Amounts")
+
+fig <- fig %>% add_histogram(x = loan_24, name = "24")
+fig <- fig %>% add_histogram(x = loan_36, name = "36")
+fig <- fig %>% add_histogram(x = loan_48, name = "48")
+fig <- fig %>% add_histogram(x = loan_60, name = "60")
+fig <- fig %>% layout(barmode = "overlay", title="Histogram of loan amounts of different terms")
+fig <- fig %>% layout(xaxis = list(title="loan amounts"), yaxis = list(title="num of records"))
+fig
+```
+
+
+## 3. Is there a relationship between a good or bad loan and the time between an account is opened an the loan is created? Is there a specific set of accounts that seem to be at higher or lower risk of defaulting?
+
+
+```{r, echo=FALSE, warning=FALSE}
+fig <- plot_ly(
+  x = accounts$acct_creation_date,
+  y = accounts$loan_default,
+  type = "scatter",
+  alpha = 0.5,
+  name = "12"
+)
+fig <- fig %>% layout(
+    xaxis = list(title="Year"),
+  yaxis = list(title="Loan status"),
+  title = "Loan default vs. Account Open date"
+    )
+fig
+```
+
+```{r, echo=FALSE, warning=FALSE}
+fig <- plot_ly(
+  x = accounts$loan_date,
+  y = accounts$loan_default,
+  type = "scatter",
+  alpha = 0.5,
+    xaxis = list(title="Year"),
+  yaxis = list(title="Loan status"),
+  title = "Loan default vs. Loan Open date"
+)
+fig <- fig %>% layout(
+    xaxis = list(title="Year"),
+  yaxis = list(title="Loan status"),
+  title = "Loan default vs. Loan Open date"
+    )
+fig
+```
+

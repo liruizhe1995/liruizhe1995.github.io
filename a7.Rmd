@@ -1,0 +1,131 @@
+---
+title: "a7"
+author: "Ruizhe Li"
+date: "12/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(tidyxl)
+library(unpivotr)
+library(tidyr)
+library(reshape)
+library(dplyr)
+library(networkD3)
+library(igraph)
+library(htmlwidgets)
+library(htmltools)
+
+test <- read_excel("data/State_to_State_Migrations_Table_2018.xls",
+                   skip = 6)
+```
+
+```{r clean data, include=FALSE}
+test <- test[-c(72:80), ]
+
+test <- test %>% drop_na(1)
+
+test <- test[-c(1,29), ]
+
+states = test[, 1]
+state = c()
+
+for (i in states){
+  state = c(state, i)
+}
+
+colnames(test)[1] <- "source"
+
+test2 <- test[,c("source",state)]
+
+origin = c("New York", "Texas", "Virginia", "Washington")
+
+test3 <- as.data.frame(test2)
+
+test3 <- test3[,c("source", origin)]
+
+test3[is.na(test3)] <- 0
+
+test3[, origin] <- sapply(test3[, origin], as.numeric)
+
+ny <- test3[order(-test3$`New York`),]
+
+ny_states <- ny[,1][1:10]
+
+texas <- test3[order(-test3$Texas),]
+
+texas_states <- texas[,1][1:10]
+
+va <- test3[order(-test3$Virginia),]
+
+va_states <- va[,1][1:10]
+
+wa <- test3[order(-test3$Washington),]
+
+wa_states <- wa[,1][1:10]
+
+df_ny <- test2[test2$source %in% ny_states, c("source","New York")]
+df_ny = as.data.frame(df_ny)
+df_ny <- melt(df_ny, id = "source")
+
+df_texas <- test2[test2$source %in% texas_states, c("source","Texas")]
+df_texas = as.data.frame(df_texas)
+df_texas <- melt(df_texas, id = "source")
+
+df_va <- test2[test2$source %in% va_states, c("source","Virginia")]
+df_va = as.data.frame(df_va)
+df_va <- melt(df_va, id = "source")
+
+df_wa <- test2[test2$source %in% wa_states, c("source","Washington")]
+df_wa = as.data.frame(df_wa)
+df_wa <- melt(df_wa, id = "source")
+
+res <- rbind(df_ny, df_texas, df_va, df_wa)
+
+colnames(res)[1] <- "target"
+colnames(res)[2] <- "source"
+colnames(res)[3] <- "count"
+
+res <- res[c(2,1,3)]
+```
+
+```{r plot network, echo=FALSE}
+links <- data.frame(res)
+
+links$source <- as.character(links$source)
+links$target <- as.character(links$target)
+
+nodes <- data.frame(name = unique(c(links$source, links$target)))
+
+links$source <- match(links$source, nodes$name) - 1
+links$target <- match(links$target, nodes$name) - 1
+links$value <- res$count
+
+links$group <- as.factor(links$source)
+
+nodes$group <- as.factor(c(rep("source", 4), rep("target", 20)))
+
+links <- data.frame(links)
+
+
+
+sankey <- sankeyNetwork(Links = links, Nodes = nodes, Source = 'source',
+              Target = 'target', Value = 'value', NodeID = 'name',
+              LinkGroup = 'group', NodeGroup = "group", colourScale = 
+                'd3.scaleOrdinal()  
+    .domain(["0", "1", "2", "3", "source", "target"])
+    .range(["#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"])'
+)
+
+sankey <- htmlwidgets::prependContent(sankey, htmltools::tags$h1("Migration Graph"))
+sankey <- htmlwidgets::prependContent(sankey, htmltools::tags$p("Top 10 states that people moved to from Washington, Texas, New York and Virginia in 2018"))
+
+
+sankey
+```
