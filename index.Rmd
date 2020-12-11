@@ -6,6 +6,8 @@ Hello!
 
 This is the portfolio of Ruizhe Li from ANLY-503 Class.
 
-The portfolio contains my visualizations of the homeworks and project in the class.
+The portfolio contains my visualizations of homeworks and project in the class.
 
-More details are available in the **About** site.
+More details are available in the [**About**](https://liruizhe1995.github.io/about.html) site.
+
+The repo of the website is linked [**here**](https://github.com/liruizhe1995/liruizhe1995.github.io)

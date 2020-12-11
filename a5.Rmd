@@ -145,12 +145,6 @@ most[!most$category=='',] %>%
 
 ## 5. Explore the validity of the data for the case whether or not an account has a credit card and whether or not they have associated credit card transactions. Is there anything worth noting?
 
-```{r}
-no_cred_id = accounts[is.na(accounts$credit_cards),]$account_id
-transactions2 = transactions[transactions$account_id==no_cred_id,]
-transactions2[transactions2$type=='credit',]
-transactions2
-```
 
 
 
