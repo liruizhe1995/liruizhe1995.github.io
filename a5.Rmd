@@ -1,7 +1,4 @@
 ---
-title: "Assignment 5"
-author: "Ruizhe Li"
-date: "12/9/2020"
 output: html_document
 ---
 ```{r setup, include=FALSE}
@@ -78,7 +75,7 @@ fig
 ## 3. Is there a relationship between a good or bad loan and the time between an account is opened an the loan is created? Is there a specific set of accounts that seem to be at higher or lower risk of defaulting?
 
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 fig <- plot_ly(
   x = accounts$acct_creation_date,
   y = accounts$loan_default,
@@ -94,7 +91,7 @@ fig <- fig %>% layout(
 fig
 ```
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 fig <- plot_ly(
   x = accounts$loan_date,
   y = accounts$loan_default,

@@ -1,7 +1,4 @@
 ---
-title: "a7"
-author: "Ruizhe Li"
-date: "12/9/2020"
 output: html_document
 ---
 

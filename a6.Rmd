@@ -1,7 +1,4 @@
 ---
-title: "a6"
-author: "Ruizhe Li"
-date: "12/9/2020"
 output: html_document
 ---
 
@@ -30,6 +27,8 @@ colnames(test)[2] <- "year"
 ue <- test
 ue$year = as.numeric(as.character(ue$year))
 ```
+
+In Texas, South and West parts and the parts near large cities such as Dallas, Houston and Austin tend to vote for Democrat candidate during the three elections.
 
 ```{r, echo=FALSE}
 election <- read.csv("data/countypres_2000-2016.csv")
@@ -70,6 +69,8 @@ grid.arrange(gg, ggue, nrow = 2)
 
 ```
 
+The unemployment rates seem to be highest in 2012 among three elections in Texas.
+
 ```{r, echo=FALSE}
 election_2012 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "California")
 
@@ -106,6 +107,10 @@ ggue12 <- ggplot(choro_ue12, aes(long, lat, group = group)) +
 grid.arrange(gg12, ggue12, nrow = 2)
 ```
 
+Most parts in California vote for Democrat candidate during these three.
+
+The same as Texas, California seems to have highest unemployment rates in 2012.
+
 ```{r, echo=FALSE}
 election_2016 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "Pennsylvania")
 
@@ -141,3 +146,5 @@ ggue16 <- ggplot(choro_ue16, aes(long, lat, group = group)) +
 
 grid.arrange(gg16, ggue16, nrow = 2)
 ```
+
+Pennsylvania tends to vote less on Democrat candidate in 2016 than before. And Unemployment rates in 2012 in Pennsylvania is highest among three elections.
