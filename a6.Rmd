@@ -2,6 +2,10 @@
 output: html_document
 ---
 
+# Geospatial Visualizations
+
+####  This is the geospatial visualizations about historical US election data and umemployment rates of three chosen states: “Texas”, “Pennsylvania” and “California”
+
 ```{r, include=FALSE}
 library(dplyr)
 library(ggplot2)
@@ -28,7 +32,7 @@ ue <- test
 ue$year = as.numeric(as.character(ue$year))
 ```
 
-In Texas, South and West parts and the parts near large cities such as Dallas, Houston and Austin tend to vote for Democrat candidate during the three elections.
+## Texas
 
 ```{r, echo=FALSE}
 election <- read.csv("data/countypres_2000-2016.csv")
@@ -69,7 +73,9 @@ grid.arrange(gg, ggue, nrow = 2)
 
 ```
 
-The unemployment rates seem to be highest in 2012 among three elections in Texas.
+In Texas, South and West parts and the parts near large cities such as Dallas, Houston and Austin tend to vote for Democrat candidate during the three elections. The unemployment rates seem to be highest in 2012 among three elections in Texas.
+
+## California
 
 ```{r, echo=FALSE}
 election_2012 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "California")
@@ -107,9 +113,9 @@ ggue12 <- ggplot(choro_ue12, aes(long, lat, group = group)) +
 grid.arrange(gg12, ggue12, nrow = 2)
 ```
 
-Most parts in California vote for Democrat candidate during these three.
+Most parts in California vote for Democrat candidate during these three. The same as Texas, California seems to have highest unemployment rates in 2012.
 
-The same as Texas, California seems to have highest unemployment rates in 2012.
+## Pennsylvania
 
 ```{r, echo=FALSE}
 election_2016 <- election %>% filter((year == 2008 | year == 2012 | year == 2016) & party == "democrat" & state == "Pennsylvania")

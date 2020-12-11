@@ -10,6 +10,8 @@ library(tidyr)
 library(plotly)
 ```
 
+# Bank Accounts Historical Transactions Visualizations
+
 ## 1.Explore all accounts. Create visualizations that combine or these account characteristics:
   * Whether an account has a credit card or not
   * Whether an account has a loan or not
@@ -108,4 +110,47 @@ fig <- fig %>% layout(
     )
 fig
 ```
+
+## 4. For the account with the highest number of transactions, make a time series line plot for the behavior of the account over time, including all debits and credits, the different methods, and the with the different categories.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+most_freq = tail(names(sort(table(transactions$account_id))),1)
+most = transactions[transactions$account_id==most_freq,]
+```
+
+# Transaction of account 8261 with different type
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+most %>% 
+  ggplot(aes(x=as.Date(date),y=amount,color=type)) +
+  geom_line() +
+  facet_wrap(~type,ncol=1,strip.position = "left") +
+  labs(x='Date', title = "transaction of account 8261 with different type")
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+most[!most$method=='',] %>% 
+  ggplot(aes(x=as.Date(date),y=amount,color=method)) +
+  geom_line() +
+  facet_wrap(~method,ncol=1,strip.position = "left") + 
+  labs(title="Transaction of account 8261 with different method", x="Date")
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+most[!most$category=='',] %>%
+  ggplot(aes(x=as.Date(date),y=amount,color=category)) +
+  geom_line() +
+  labs(title="Transaction of account 8261 with different category", x="Date")
+```
+
+
+## 5. Explore the validity of the data for the case whether or not an account has a credit card and whether or not they have associated credit card transactions. Is there anything worth noting?
+
+```{r}
+no_cred_id = accounts[is.na(accounts$credit_cards),]$account_id
+transactions2 = transactions[transactions$account_id==no_cred_id,]
+transactions2[transactions2$type=='credit',]
+transactions2
+```
+
+
 

@@ -1,5 +1,6 @@
 name: "my-website"
 output_dir: "docs"
+theme: jekyll-theme-cayman
 navbar:
   title: "503 Portfolollio"
   left:
