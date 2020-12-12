@@ -73,6 +73,9 @@ Overall Ratings and Final Standing 19/20 Season
 Column
 -----------------------------------------------------------------------
 
+***
+    The top 6 most famous team in Premier League: Manchester City, Liverpool, Tottenham Hotspur, Manchester United and Chelsea have the top 6 highest overall ability players in Premier League.
+
 ### Overall in FIFA for Each Team's Player in 19/20 Season
 
 ```{r}
@@ -109,12 +112,11 @@ ggplot(prem_players_18, aes(club, overall, fill=club)) +
 
 ```
 
-*** 
-
-    The top 6 most famous team in Premier League: Manchester City, Liverpool, Tottenham Hotspur, Manchester United and Chelsea have the top 6 highest overall ability players in Premier League.
-
 Column
 ------------------------------------------------------------------------
+
+***
+    In 19/20 season we see that top 6 teams in overall are all in top 10 final rank. Leicester City and Wolverhampton are the two teams with lower overall ratings but quite high in final rank. For the lower part teams in the season final ranking, we see that the overall ability of those team are similar therefore their final rank are more unpredictable based on the players' overall stats.
 
 ### Final Rank and Points in 19/20 Season
 
@@ -140,15 +142,15 @@ ggplot(rank19, aes(Team, P, fill=Team)) +
   
 ```
 
-***
-
-    In 19/20 season we see that top 6 teams in overall are all in top 10 final rank. Leicester City and Wolverhampton are the two teams with lower overall ratings but quite high in final rank. For the lower part teams in the season final ranking, we see that the overall ability of those team are similar therefore their final rank are more unpredictable based on the players' overall stats.
 
 Map of players
 =======================================================================
 
 Column {data-width=500}
 -----------------------------------------------------------------------
+
+*** 
+    Most Players in Premier League are from the England since there's a rule in Premier League with minimum number of British players in each team.
 
 ### Map of Total Player Count in Premier League in 19/20 Season Except Britain
 
@@ -174,13 +176,11 @@ ggplot(data = merged_data, aes(x = long, y = lat, group = group)) +
   my_theme()
 ```
 
-*** 
-
-    Most Players in Premier League are from the England since there's a rule in Premier League with minimum number of British players in each team.
-
-
 Column {data-width=500}
 -----------------------------------------------------------------------
+
+***
+    We see that except for Britain, most Premier League players come from South America, France and Spain. Also there are some players from Africa, Oceania, Europe and east Asia.
 
 ### Map of Total Player Count in Premier League in 19/20 Season Containing Britain
 
@@ -197,9 +197,6 @@ ggplot(data = merged_data, aes(x = long, y = lat, group = group)) +
   my_theme()
 ```
 
-*** 
-
-    We see that except for Britain, most Premier League players come from South America, France and Spain. Also there are some players from Africa, Oceania, Europe and east Asia.
     
 
 Year 2020 Transfer Overall 
@@ -207,6 +204,9 @@ Year 2020 Transfer Overall
 
 Column {data-width=500}
 -----------------------------------------------------------------------
+
+***
+    In general, Chelsea FC, Mancheter City and Arsenal FC spent top three amount of money on buying players. While Leeds United, Sheffiled United, Aston Villa, Newcaste United, Fulham FC and Burnley FC didn't get any money from selling or lending players.
 
 ### Overall Transfer for English Premier League in 2020
 
@@ -238,12 +238,12 @@ ggplot(transfer, aes(spending, club_name)) +
   
 ```
 
-***
-
-    In general, Chelsea FC, Mancheter City and Arsenal FC spent top three amount of money on buying players. While Leeds United, Sheffiled United, Aston Villa, Newcaste United, Fulham FC and Burnley FC didn't get any money from selling or lending players.
 
 Column {data-width=500}
 -----------------------------------------------------------------------
+
+***
+    From the graph, it's unusual to see Brighton and Fulham transfered in as many players as Chelsea and Mancheter City. Most of the players Fulham and Brighton got are the ones without transfer fee or end of loan so they didn't pay too much from getting the players.
 
 ### Number of players transfer
 
@@ -261,15 +261,15 @@ ggplot(transfer_cnt, aes(club_name, n, fill=transfer_movement)) +
   my_theme()
 ```
 
-***
-
-    From the graph, it's unusual to see Brighton and Fulham transfered in as many players as Chelsea and Mancheter City. Most of the players Fulham and Brighton got are the ones without transfer fee or end of loan so they didn't pay too much from getting the players.
 
 Network Graph and Word Cloud About 2020 Transfer
 =======================================================================
 
 Column {data-width=500}
 -----------------------------------------------------------------------
+
+***
+    The graph shows the player transfers between Premier League's teams in 2020. The top teams such as Arsenal, Chelsea and Liverpool didn't buy players from other Premier League's teams and sold the players they no longer needed to other teams.
 
 ### Network Graph for 2020 Transfer
 
@@ -296,14 +296,13 @@ network <- graph_from_data_frame(d=links, vertices=nodes, directed=TRUE)
 plot(network, layout = layout.circle, edge.width=E(network)$importance*2, main="Transfer among Premier League's Teams in 2020")
 ```
 
-***
-
-    The graph shows the player transfers between Premier League's teams in 2020. The top teams such as Arsenal, Chelsea and Liverpool didn't buy players from other Premier League's teams and sold the players they no longer needed to other teams.
-
 
 
 Column {data-width=500}
 -----------------------------------------------------------------------
+
+***
+    Bournemouth, Chelsea and Liverpool sold most number of players to other Premier League's teams in 2020.
 
 ### Word Cloud
 
@@ -320,8 +319,6 @@ ggplot(wc_out, aes(label = source, size=cnt, color = factor(sample.int(10, nrow(
   my_theme()
 ```
 
-***
-    Bournemouth, Chelsea and Liverpool sold most number of players to other Premier League's teams in 2020.
 
 Transfer in ranking from 2015 to 2020 
 =======================================================================
