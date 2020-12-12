@@ -143,8 +143,3 @@ most[!most$category=='',] %>%
 ```
 
 
-## 5. Explore the validity of the data for the case whether or not an account has a credit card and whether or not they have associated credit card transactions. Is there anything worth noting?
-
-
-
-
